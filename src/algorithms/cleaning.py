@@ -17,6 +17,28 @@ def remove_admin_cron_guest_records(df: DataFrame) -> DataFrame:
     return df
 
 
+def remove_deleted_activities(df: DataFrame) -> DataFrame:
+    """
+    Remove logs of actions performed on deleted modules or activities. Please be aware that if you are performing
+    temporal analysis these activities must be removed after duration calculation.
+
+    Args:
+        df: the dataframe
+
+    Returns:
+        The cleaned dataframe
+
+    """
+
+    deleted = (df.loc[df.Description == 'deleted']).index
+    deletion_in_progress = (df.loc[df.Description == 'deletion in progress']).index
+    to_remove = deleted + deletion_in_progress
+
+    df.drop(to_remove, axis=0, inplace=True)
+
+    return df
+
+
 def remove_records_left(df: DataFrame) -> DataFrame:
     """
     Remove data whose course is not provided in the list of courses with id and year and whose area is absent
@@ -81,10 +103,14 @@ def clean_dataset_records(records: Records) -> Records:
     reservation = list((df.loc[df['Component'] == 'Reservation']).index)
     activity_completion = list((df.loc[df['Event_name'] == 'Course activity completion updated']).index)
     mod_choice = list((df.loc[df['Component'] == 'mod_choicegroup']).index)
-    notification = list((df.loc[(df['Event_name'] == 'Notification sent')
-                                & (df['Component'] == 'Assignment')]).index)
+    # notification = list((df.loc[(df['Event_name'] == 'Notification sent')
+    #                            & (df['Component'] == 'Assignment')]).index)
 
-    to_remove = xp + wooclap + chat + reservation + activity_completion + mod_choice + notification
+    to_remove = xp + wooclap + chat + reservation + activity_completion + mod_choice #+ notification
     df.drop(to_remove, axis=0, inplace=True)
 
     return records
+
+
+# elimina i role assigned con course = 1 se diversi da manger course creator o admin perchè non corretti
+# elimina moodle site con course = 1 perchè sistemati per non fail

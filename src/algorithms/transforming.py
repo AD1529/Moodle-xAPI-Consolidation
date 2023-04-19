@@ -46,3 +46,13 @@ def make_timestamp_readable(df: DataFrame) -> DataFrame:
     df['Time'] = df.loc[:, 'Unix_Time'].map(lambda x: tm.convert_time_to_timestamp(x))
 
     return df
+
+
+def convert_role(df: DataFrame) -> DataFrame:
+
+    df.loc[df.Role == 'student role', 'Role'] = 'Student'
+    df.loc[df.Role == 'editingteacher role', 'Role'] = 'Teacher'
+    df.loc[df.Role == 'teacher role', 'Role'] = 'Non-editing Teacher'
+    df.loc[df.Role == 'administratif role', 'Role'] = 'Administratif'
+
+    return df
