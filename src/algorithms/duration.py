@@ -39,4 +39,3 @@ def get_basic_duration(records: Records,
     df[duration_field] = [np.int64(d) for d in df[duration_field]]
 
     return records
-

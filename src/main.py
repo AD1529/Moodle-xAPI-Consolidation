@@ -6,31 +6,39 @@ from src.classes.records import Records
 from pandas import DataFrame
 
 
-def get_consolidated_data(extracted_logs: str) -> DataFrame:
+def get_consolidated_data(extracted_logs: str,
+                          course_names: str) -> DataFrame:
 
     # collect data
-    data_logs = it.get_dataframe(extracted_logs)
-    data_logs = data_logs.reset_index()
+    data_logs = it.get_dataframe(extracted_logs) # data_logs = data_logs.drop_duplicates()
+    # reverse data logs from oldest to most recent
+    data_logs = data_logs[::-1].copy()
+    data_logs = data_logs.reset_index(drop=True)
+    # rename columns
     data_logs = tr.rename_columns(data_logs)
 
     # --------------------
     # DATA INTEGRATION
     # --------------------
     data_logs = it.add_course_id(data_logs)
+    data_logs = it.add_course_name(data_logs, course_names)
     data_logs = it.add_timestamps(data_logs)
     data_logs = it.add_component(data_logs)
     data_logs = it.add_event_name(data_logs)
-    data_logs = it.course_area_categorisation(data_logs)
-    data_logs = it.component_redefinition(data_logs)
-    # course_logs = it.event_name_redefinition(course_logs)
+    data_logs = it.redefine_course_area(data_logs)
+    data_logs = it.redefine_component(data_logs)
+    data_logs = it.redefine_event_name(data_logs)
+    data_logs = it.add_role(data_logs)
+    data_logs = it.add_status(data_logs)
 
     # --------------------
     # DATA SELECTION
     # --------------------
     # select and reorder columns
-    cols = ['ID', 'Unix_Time', 'Time', 'Course', 'Username', 'Component', 'Event_name']
+    cols = ['Unix_Time', 'Time', 'Role', 'Username',
+            'courseid', 'Course_Area', 'Context', 'Component', 'Event_name' , 'Status']
     # drop unused columns
-    # course_logs = course_logs[cols].copy()
+    data_logs = data_logs[cols].copy()
 
     # --------------------
     # EVENT DURATION
@@ -42,9 +50,6 @@ def get_consolidated_data(extracted_logs: str) -> DataFrame:
     # get the standard duration for all values of the dataframe
     # df_duration = dt.get_basic_duration(course_logs)
 
-    # dani_logs = it.get_dataframe('datasets/df_prepared.csv')
-    # dani_logs = Records(dani_logs)
-
     return data_logs
 
 
@@ -52,4 +57,5 @@ if __name__ == '__main__':
 
     from src.paths import *
 
-    df = get_consolidated_data(extracted_logs=course_logs_path)
+    df = get_consolidated_data(extracted_logs=course_logs_path,
+                               course_names=course_names_path)

@@ -14,7 +14,7 @@ def convert_time_to_timestamp(date: str) -> int:
     """
 
     # date is converted in a date and time string format
-    date_to_string = datetime.strptime(date, "%Y-%m-%dT%X%z")
+    date_to_string = datetime.strptime(date, "%Y-%m-%d %X%z")
     # date and time string format is converted in unix timestamp
     time_to_timestamp = int(datetime.timestamp(date_to_string))
 

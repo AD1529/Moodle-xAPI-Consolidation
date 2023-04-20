@@ -92,7 +92,7 @@ def add_event_name(df: DataFrame) -> DataFrame:
     return df
 
 
-def course_area_categorisation(df: DataFrame) -> DataFrame:
+def redefine_course_area(df: DataFrame) -> DataFrame:
 
     # authentication
     df.loc[df['Event_name'] == 'user_loggedin', 'Course_Area'] = 'Authentication'
@@ -132,7 +132,7 @@ def course_area_categorisation(df: DataFrame) -> DataFrame:
     return df
 
 
-def component_redefinition(df: DataFrame) -> DataFrame:
+def redefine_component(df: DataFrame) -> DataFrame:
 
     # course activity completion updated
     ccu = list(df.loc[df['Event_name'] == 'course_module_completion_updated'].index)
@@ -279,7 +279,7 @@ def component_redefinition(df: DataFrame) -> DataFrame:
     return df
 
 
-def event_name_redefinition(df: DataFrame) -> DataFrame:
+def redefine_event_name(df: DataFrame) -> DataFrame:
     """
     Transform the path extracted from the database in the extended readable format. This function can be modified
     according to your needs. The complete list of events is available on https://yoursite/report/eventlist/index.php
@@ -596,9 +596,8 @@ def add_role(df: DataFrame) -> DataFrame:
 
 def add_status(df: DataFrame) -> DataFrame:
 
-    df.loc[df.Context == 'not available', 'Status'] = 'DELETED'
+    df.loc[(df.Context == 'not available') | (df.Description == 'deleted'), 'Status'] = 'DELETED'
 
     df.loc[df['Status'].isnull(), 'Status'] = 'Available'
 
     return df
-

@@ -6,12 +6,13 @@ def rename_columns(df: DataFrame) -> DataFrame:
 
     # rename columns
     df.rename(columns={'index': 'ID',
-                       'Timestamp': 'Time',
+                       'timestamp': 'Time',
                        'Email': 'Username',
                        'ACTION_VERB': 'Verb',
+                       'OBJECT_NAME': 'Context',
                        'OBJECT_TYPE': 'Object',
-                       'Context': 'Path',
-                       'OBJECT_NAME': 'Context'},
+                       'OBJECT_DESCRIPTION': 'Description',
+                       'Context': 'Path'},
               inplace=True)
 
     return df
