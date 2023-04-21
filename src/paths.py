@@ -1,12 +1,5 @@
-# logs
-course_logs_path = 'datasets/moodle_course_id200.csv'
+example_logs_path = 'src/datasets/example_logs.csv'
+example_names_path = 'src/datasets/example_names.csv'
+example_dates_path = 'src/datasets/example_dates.csv'
 
-
-# courses
-course_names_path = 'datasets/course_names.csv'
-
-
-# dates
-course_dates_path = 'datasets/course_dates.csv'
-
-
+example_consolidated_data_path = 'src/datasets/consolidated/data.csv'

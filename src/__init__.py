@@ -1,3 +1,5 @@
-from src.classes.records import Records
+__version__ = '0.1'
+__author__ = 'Daniela Rotelli'
 
+__all__ = ["algorithms", "classes", "datasets"]
 

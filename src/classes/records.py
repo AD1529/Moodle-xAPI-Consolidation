@@ -4,7 +4,7 @@ from pandas import DataFrame, Series
 class Records(object):
     """
     The dataframe of the Records object has the following fields:
-    'ID', 'Time', 'Username', 'Role', 'Course_Area', 'Component', 'Event_name', 'Year', 'Unix_Time'
+    'ID', 'Time', 'Username', 'Role', 'Course_Area', 'Component', 'Event_name', 'Unix_Time'
     """
 
     def __init__(self, df):
@@ -79,11 +79,3 @@ class Records(object):
         event_names = self.__df.sort_values('Event_name', ascending=True).groupby('Component')['Event_name'].unique()
 
         return event_names
-
-    def get_years(self) -> []:
-        """
-        Return a list of record years
-        """
-        years = sorted(self.__df.Year.unique())
-
-        return years

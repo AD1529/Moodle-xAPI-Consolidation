@@ -1,13 +1,15 @@
 from pandas import DataFrame
-import src.algorithms.timing as tm
 
 
 def rename_columns(df: DataFrame) -> DataFrame:
+    """
+    Rename the fields of the extracted logs csv file. Modify the function according to your names.
+    """
 
     # rename columns
     df.rename(columns={'index': 'ID',
-                       'timestamp': 'Time',
                        'Email': 'Username',
+                       'timestamp': 'Time',
                        'ACTION_VERB': 'Verb',
                        'OBJECT_NAME': 'Context',
                        'OBJECT_TYPE': 'Object',
@@ -18,42 +20,14 @@ def rename_columns(df: DataFrame) -> DataFrame:
     return df
 
 
-def convert_data_types(df: DataFrame) -> DataFrame:
-
-    # set data types
-    df['Time'] = df['Time'].astype('str')
-    df['Username'] = df['Username'].astype('str')
-    df['Affected_user'] = df['Affected_user'].astype('str')
-    df['Event_context'] = df['Event_context'].astype('str')
-    df['Component'] = df['Component'].astype('str')
-    df['Event_name'] = df['Event_name'].astype('str')
-    df['Description'] = df['Description'].astype('str')
-    df['Origin'] = df['Origin'].astype('str')
-    df['IP_address'] = df['IP_address'].astype('str')
-    df['ID'] = df['ID'].astype('Int64')
-    df['user_id'] = df['user_id'].astype('Int64').astype('str')
-    df['course_id'] = df['course_id'].astype('Int64').astype('str')
-    df['related_user_id'] = df['related_user_id'].astype('str')
-    df['Unix_Time'] = df['Unix_Time'].astype('Int64')
-    df['Course_Area'] = df['Course_Area'].astype('str')
-    df['Year'] = df['Year'].astype('str').astype('Int64')
-    df['Role'] = df['Role'].astype('str')
-
-    return df
-
-
-def make_timestamp_readable(df: DataFrame) -> DataFrame:
-
-    df['Time'] = df.loc[:, 'Unix_Time'].map(lambda x: tm.convert_time_to_timestamp(x))
-
-    return df
-
-
 def convert_role(df: DataFrame) -> DataFrame:
+    """
+    Rename the role names according to your needs.
+    """
 
     df.loc[df.Role == 'student role', 'Role'] = 'Student'
     df.loc[df.Role == 'editingteacher role', 'Role'] = 'Teacher'
     df.loc[df.Role == 'teacher role', 'Role'] = 'Non-editing Teacher'
-    df.loc[df.Role == 'administratif role', 'Role'] = 'Administratif'
+    df.loc[df.Role == 'administratif role', 'Role'] = 'Administrative'
 
     return df

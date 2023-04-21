@@ -1,27 +1,26 @@
-from src.classes.records import Records
-from typing import Any
+from pandas import DataFrame
 
 
-def sort_records(records: Records,
-                 sort_by: str or [str],
-                 ascending: bool or [bool] = True,
-                 inplace: Any = True) -> Records:
+def sort_data(df: DataFrame) -> DataFrame:
     """
-    Sort values based on the given fields.
-
-    Args:
-        records: object of the class Records
-        sort_by: dataframe field or list of dataframe field to sort by
-        ascending: sorting can be done any way: ascending or descending. List specifications for various sorting
-        inplace: perform the sorting in-place if True
-
-    Returns:
-        Sorted object of the class Records
+    Sort values based on the given fields. This function first verifies that logs are accessible from earliest to
+    newest.  Due to the fact that a number of functions rely on the sequence of logs, it is crucial that the sequence
+    be in the correct order to prevent biased results.
     """
 
-    # get the df
-    df = records.get_df()
-    # sort values
-    df.sort_values(by=sort_by, ascending=ascending, inplace=inplace)
+    max_time = df.Unix_Time.iloc[-1]
+    min_time = df.Unix_Time.iloc[0]
+    if max_time < min_time:
+        df = df[::-1].copy()
+        df = df.reset_index(drop=True)
+        df['ID'] = df.index
 
-    return records
+    df = df.sort_values(by=['Unix_Time', 'ID'])
+    df = df.reset_index(drop=True)
+    df['ID'] = df.index
+
+    df.sort_values(by=['Username', 'ID'])
+    df = df.reset_index(drop=True)
+    df['ID'] = df.index
+
+    return df

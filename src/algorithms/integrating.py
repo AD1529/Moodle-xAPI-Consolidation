@@ -3,9 +3,45 @@ from pandas import DataFrame
 import numpy as np
 import src.algorithms.timing as tm
 import src.algorithms.transforming as tr
+import glob
+
+
+def collect_log_files(directory_path: str) -> DataFrame:
+    """
+    It is possible to have a number of course files instead of a single one.
+    The selected directory must contain all related files.
+
+    Args:
+        directory_path: The path of the directory that contains all the files.
+
+    Returns: The dataframe containing the logs of the all the course files inserted in the directory.
+    """
+
+    logs = pd.DataFrame()
+
+    for file_path in glob.glob(directory_path + '*.csv'):
+        # get the log data of the file
+        file_logs = get_dataframe(file_path)
+        # concatenate the file logs to all the logs
+        logs = pd.concat([logs, file_logs], axis=0)
+
+    # reset the index
+    logs = logs.reset_index(drop=True)
+
+    return logs
 
 
 def get_dataframe(file_path: str, columns: [] = None) -> DataFrame:
+    """
+    Read the dataframe and add columns if missing.
+
+    Args:
+        file_path: The path of the dataframe object.
+        columns: The list of column names.
+
+    Returns:
+        The dataframe with column names.
+    """
 
     df = pd.read_csv(file_path, sep=',')
 
@@ -18,10 +54,17 @@ def get_dataframe(file_path: str, columns: [] = None) -> DataFrame:
     except ValueError:
         pass
 
+    # create the index in case is missing
+    df.reset_index(inplace=True)
+
     return df
 
 
 def add_course_id(df: DataFrame) -> DataFrame:
+    """
+    Add the course id by extracting it from the RelatedActivities field.
+    """
+
     items = df['RelatedActivities'].values
 
     ids = []
@@ -49,8 +92,7 @@ def add_course_name(df: DataFrame, course_names: str) -> DataFrame:
 
     Args:
         df: The dataframe object.
-        course_names: str,
-            The path of the course names file.
+        course_names: The path of the course names file.
 
     Returns:
         The dataframe with the field course name.
@@ -72,6 +114,10 @@ def add_course_name(df: DataFrame, course_names: str) -> DataFrame:
 
 
 def add_timestamps(df: DataFrame) -> DataFrame:
+    """
+    Add the column 'Unix_Time' to the dataframe containing the converted value of the time in a timestamp so that it
+    can be used by other functions.
+    """
 
     df['Unix_Time'] = df.loc[:, 'Time'].map(lambda x: tm.convert_time_to_timestamp(x))
 
@@ -79,6 +125,9 @@ def add_timestamps(df: DataFrame) -> DataFrame:
 
 
 def add_component(df: DataFrame) -> DataFrame:
+    """
+    Add the component field to the dataframe.
+    """
 
     df['Component'] = [x.split('\\')[1] for x in df['Path']]
 
@@ -86,6 +135,9 @@ def add_component(df: DataFrame) -> DataFrame:
 
 
 def add_event_name(df: DataFrame) -> DataFrame:
+    """
+    Add the event_name field to the dataframe.
+    """
 
     df['Event_name'] = [x.split('event\\')[1] for x in df['Path']]
 
@@ -93,6 +145,10 @@ def add_event_name(df: DataFrame) -> DataFrame:
 
 
 def redefine_course_area(df: DataFrame) -> DataFrame:
+    """
+    Add the Course_Area field to those records that identify actions performed in the site outside a course and that
+    miss a value.
+    """
 
     # authentication
     df.loc[df['Event_name'] == 'user_loggedin', 'Course_Area'] = 'Authentication'
@@ -116,11 +172,6 @@ def redefine_course_area(df: DataFrame) -> DataFrame:
     # profile
     df.loc[df['Event_name'].str.contains('dashboard'), 'Course_Area'] = 'Profile'
     df.loc[(df['Event_name'] == 'user_profile_viewed') & (df['courseid'] == 0), 'Course_Area'] = 'Profile'
-    # profile = df.loc[(df['Event_name'] == 'user_profile_viewed') & (df['courseid'] == 0)]
-    # profile_to = (profile['Context'].apply(lambda d: d.split('profile of ')[1])).values
-    # profile_from = (df.loc[(df['Event_name'] == 'user_profile_viewed')]['Username']).values
-    # df.loc[(df['Event_name'] == 'user_profile_viewed') & (df['courseid'] == 0), 'Course_Area'] = \
-    # ['Social interaction' if profile_to[x] != profile_from[x] else 'Profile' for x in range(len(profile_to))]
     df.loc[(df['Event_name'] == 'grade_report_viewed') & (df['courseid'] == 0), 'Course_Area'] = 'Profile'
     df.loc[df['Event_name'] == 'user_password_updated', 'Course_Area'] = 'Profile'
     df.loc[df['Event_name'] == 'user_updated', 'Course_Area'] = 'Profile'
@@ -133,6 +184,12 @@ def redefine_course_area(df: DataFrame) -> DataFrame:
 
 
 def redefine_component(df: DataFrame) -> DataFrame:
+    """
+    The component field can be labelled with the 'System' value even though the log is clearly generated when the user
+    is performing an action on a specific module. Sometimes some records are recorded on different components even
+    though they are related to the same component. This function redefines the component field.
+
+    """
 
     # course activity completion updated
     ccu = list(df.loc[df['Event_name'] == 'course_module_completion_updated'].index)
@@ -281,14 +338,8 @@ def redefine_component(df: DataFrame) -> DataFrame:
 
 def redefine_event_name(df: DataFrame) -> DataFrame:
     """
-    Transform the path extracted from the database in the extended readable format. This function can be modified
-    according to your needs. The complete list of events is available on https://yoursite/report/eventlist/index.php
-
-    Args:
-        df: the dataframe
-
-    Returns:
-        The dataframe with redefined event names.
+    Transform the path extracted from the statement.extension in the extended readable format. This function can be
+    modified according to your needs. The complete list of events is available on https://yoursite/report/eventlist/index.php
 
     """
 
@@ -549,6 +600,17 @@ def redefine_event_name(df: DataFrame) -> DataFrame:
 
 
 def add_role(df: DataFrame) -> DataFrame:
+    """
+    A role is a collection of permissions defined for the whole system that can be assigned to specific users in
+    specific contexts. When a user logs in, they are considered "authenticated." Users can be teachers or students
+    only within a course. A user can have multiple roles, representing as both a teacher and a student in different
+    courses. The complete list of roles is available at the page: your_moodle_site/admin/roles/manage.php. This
+    function can be extended according to specific requirements.
+
+    Please be aware that any system roles (suche as admin, manager, course-creator, or specifically created role) apply
+    to the assigned users throughout the entire system, including the front page and all the courses. A user can be a
+    teacher in a course and a student in another course. A manager can only be a manager.
+    """
 
     df["Role"] = np.nan
 
@@ -595,6 +657,11 @@ def add_role(df: DataFrame) -> DataFrame:
 
 
 def add_status(df: DataFrame) -> DataFrame:
+    """
+    Identify actions performed on deleted modules or deleted users
+
+    Returns two values: DELETED or Available.
+    """
 
     df.loc[(df.Context == 'not available') | (df.Description == 'deleted'), 'Status'] = 'DELETED'
 
