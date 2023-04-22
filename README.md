@@ -1,12 +1,15 @@
-# Lip6-Moodle-LRS
-This repository contains the code for consolidating Moodle log data extracted from an LRS.
+# xAPI-LRS-Moodle
+This repository contains the template for consolidating Moodle log data extracted from an LRS in xAPI format.
 
 ## Table of contents
-* [Quick start. Collect your data](#collect-your-data)
-* [Quick start. Collect your data. Data structure](#data-structure)
-* [Quick start. Access your data](#access-your-data)
-* [Quick start. Get your consolidated data](#get-your-consolidated-data)
+* [Collect your data](#collect-your-data)
+* * [Data structure](#data-structure)
+* [Access your data](#access-your-data)
+* [Get your consolidated data](#get-your-consolidated-data)
+* * [Example](#example)
 * [License](#license)
+* [Acknowledgments](#acknowledgements)
+* [Contacts](#contact--s-)
 
 ## Quick start
 This section contains a description of the data structure expected by the algorithms, as well as instructions on how 
@@ -32,7 +35,7 @@ The logs file should contain at least the following columns:
 
 Please be aware that you can use various names depending on your needs, but you have to rename them by respecting the fields in the `src.algorithms.transforming.py` file.
 
-The name file should contain two columns: the name of the course and the id. The `src/datasets` folder contains examples of the expected files. 
+The name's file should contain two columns: the name of the courses and their id. The `src/datasets` folder contains examples of the expected files. 
 
 Export all files into *CSV* format.
 
@@ -68,6 +71,14 @@ Then, to extract specific data, you can specify the following parameters: 'cours
 Note that you may choose more than one entry, and that each entry must be provided as a list.
 The entire dataset is returned if you make no selections.
 
+You can also specify the 'dates_path' containing the course dates to remove values that don't fall within the start and 
+end dates.
+You can add start and end dates manually or by querying the database:
+```SQL
+SELECT id, shortname, startdate, enddate 
+FROM mdl_course
+where id <> 1
+```
 
 ### Example
 
@@ -98,3 +109,17 @@ course_B = ex.extract_records(records, username=['Student 01'])
 ## License
 
 This project is licensed under the terms of the GNU General Public License v3.0.
+
+If you use the template in an academic setting, please cite the following papers:
+
+> Authors' name
+
+```tex
+TO BE ADDED
+```
+
+## Acknowledgements
+
+## Contact(s)
+[Daniela Rotelli](mailto:daniela.rotelli@phd.unipi.it) - Department of Computer Science - University of Pisa (Italy)
+[Yves Noël](mailto:yves.noel@sorbonne-universite.fr) - Lab Lip6 - MOCAH team - Sorbonne Université - Paris (France)
