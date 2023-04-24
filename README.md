@@ -1,4 +1,4 @@
-# xAPI-LRS-Moodle
+# Moodle-XAPI-Consolidation
 This repository contains the template for consolidating Moodle log data extracted from an LRS in xAPI format.
 
 ## Table of contents
